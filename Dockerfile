@@ -13,4 +13,4 @@ RUN bundle install
 
 COPY . .
 
-ENTRYPOINT ["ruby", "./entrypoint.rb"]
+ENTRYPOINT "./entrypoint.rb"
