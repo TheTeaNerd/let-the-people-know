@@ -1,16 +1,11 @@
-# action.yml
-name: 'Hello World'
-description: 'Greet someone and record the time'
+name: 'Let the people know!'
+description: 'Publish a CHANGELOG to a Slack channel'
 inputs:
-  who-to-greet:  # id of input
-    description: 'Who to greet'
+  slack-channel:  # id of input
+    description: 'Which channel to send to'
     required: true
-    default: 'World'
-outputs:
-  time: # id of output
-    description: 'The time we greeted you'
 runs:
   using: 'docker'
   image: 'Dockerfile'
   args:
-    - ${{ inputs.who-to-greet }}
+    - ${{ inputs.slack-channel }}
