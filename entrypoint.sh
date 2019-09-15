@@ -8,5 +8,4 @@ ls
 echo
 echo "Params are: $*"
 echo
-echo "ruby ./entrypoint.rb $*"
-ruby ./entrypoint.rb $*
+ruby /usr/src/app/entrypoint.rb $*
