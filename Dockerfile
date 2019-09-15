@@ -12,5 +12,6 @@ COPY Gemfile Gemfile.lock ./
 RUN bundle install
 
 COPY . .
+COPY entrypoint.sh /entrypoint.sh
 
-ENTRYPOINT ["./entrypoint.sh"]
+ENTRYPOINT ["/entrypoint.sh"]
