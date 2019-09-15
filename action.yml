@@ -1,0 +1,11 @@
+name: 'Let the people know!'
+description: 'Publish a CHANGELOG to a Slack channel'
+inputs:
+  slack-channel:  # id of input
+    description: 'Which channel to send to'
+    required: true
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.slack-channel }}
