@@ -13,4 +13,4 @@ RUN bundle install
 
 COPY . .
 
-ENTRYPOINT "./entrypoint.sh"
+ENTRYPOINT ["./entrypoint.sh"]
