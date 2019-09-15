@@ -1,10 +1,16 @@
-# Container image that runs your code
-FROM alpine:3.10
+FROM ruby:2.5
 
-RUN apk add jq
+RUN gem update --system
+RUN gem install bundler
 
-# Copies your code file from your action repository to the filesystem path `/` of the container
-COPY entrypoint.sh /entrypoint.sh
+# throw errors if Gemfile has been modified since Gemfile.lock
+RUN bundle config --global frozen 1
 
-# Code file to execute when the docker container starts up (`entrypoint.sh`)
-ENTRYPOINT ["/entrypoint.sh"]
+WORKDIR /usr/src/app
+
+COPY Gemfile Gemfile.lock ./
+RUN bundle install
+
+COPY . .
+
+CMD ["ruby", "./entrypoint.rb"]
