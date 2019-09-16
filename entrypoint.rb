@@ -2,8 +2,7 @@ require 'yaml'
 
 
 puts 'ENVIRONMENT:'
-puts ENV
-puts
+puts( ENV.map{ |k,v| "#{k} => #{v}" }.sort )
 
 channel = ARGV[1] || 'releases'
 event = ENV.fetch('GITHUB_EVENT_PATH')
