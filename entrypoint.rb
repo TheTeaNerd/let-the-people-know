@@ -13,6 +13,6 @@ commits = parsed.fetch('commits')
 puts "Commits are:"
 commits.select do |commit|
   commit.fetch('distinct') == false
-end.each(with_index(1) do |commit, index|
+end.each.with_index(1) do |commit, index|
   puts "#{index}. #{commit.fetch('message')} (_#{commit.dig('author', 'name')}_)"
 end
