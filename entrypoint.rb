@@ -12,7 +12,7 @@ puts "Channel is #{channel}"
 puts
 
 webhook = ENV.fetch('SLACK_WEBHOOK')
-puts "Channel is #{webhook}"
+puts "Webhook is #{webhook}"
 puts
 
 event = ENV.fetch('GITHUB_EVENT_PATH')
@@ -39,6 +39,7 @@ merge_commits.each.with_index(1) do |commit, index|
 end
 
 
+puts "Sending to Slack"
 notifier = Slack::Notifier.new(webhook) do
   defaults channel: "##{channel}"
            username: "Let the people know"
