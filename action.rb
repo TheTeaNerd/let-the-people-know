@@ -18,8 +18,8 @@ end
 return if commits.empty?
 
 repository_name = parsed.dig('repository', 'name')
-                        .split('-')
-                        .map(&:capitalize)
+.split('-')
+   .map(&:capitalize)
                         .join
 repository_url = parsed.dig('repository', 'html_url')
 announcement = <<~MARKUP
