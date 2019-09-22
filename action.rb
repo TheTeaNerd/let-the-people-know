@@ -4,27 +4,16 @@ require 'date'
 require 'slack-notifier'
 require 'yaml'
 
-puts '------------------------'
-puts 'ENVIRONMENT: '
-puts(ENV.map { |k, v| "#{k} => #{v}" }.sort)
-puts '------------------------'
-puts
-
 webhook = ENV.fetch('SLACK_WEBHOOK')
 event = ENV.fetch('GITHUB_EVENT_PATH')
 
 parsed = YAML.safe_load(File.open(event))
-puts 'Event is:'
-puts parsed
-puts
-puts
-
-commits = parsed.fetch('commits')
-                .reject do |commit|
-                  commit.fetch('message').start_with?('Merge pull request')
-                end.reject do |commit|
-                  commit.dig('author', 'name') == 'Travis CI'
-                end
+commits = parsed.fetch('commits').reject do |commit|
+  commit.fetch('message').start_with?('Merge pull request')
+end
+commits = commits.reject do |commit|
+  commit.dig('author', 'name') == 'Travis CI'
+end
 
 return if commits.empty?
 
@@ -33,7 +22,11 @@ repository_name = parsed.dig('repository', 'name')
                         .map(&:capitalize)
                         .join
 repository_url = parsed.dig('repository', 'html_url')
-announcement = "*[#{repository_name}](#{repository_url}) has been updated!*\n\n_Changes_\n"
+announcement = <<~MARKUP
+  *[#{repository_name}](#{repository_url}) has been updated!*
+
+  _Changes_
+MARKUP
 commits.each do |commit|
   message_lines = commit.fetch('message')
                         .gsub(/\[no *ticket\]/i, '')

@@ -8,7 +8,7 @@ COPY Gemfile \
      action.rb \
      action.yml ${APP_HOME}/
 
-RUN bundle install
+RUN bundle install --without development test
 
 COPY entrypoint /entrypoint
 
