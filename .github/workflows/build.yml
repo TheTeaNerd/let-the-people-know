@@ -11,4 +11,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build the Docker image
         uses: actions/checkout@v1
-        run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+      - run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
