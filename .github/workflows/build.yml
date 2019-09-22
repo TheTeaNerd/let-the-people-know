@@ -1,4 +1,4 @@
-name: Rubocop Checks
+name: Build this Action
 on: [push]
 
 jobs:
@@ -9,3 +9,6 @@ jobs:
         uses: gimenete/rubocop-action@1.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build the Docker image
+        uses: actions/checkout@v1
+        run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
