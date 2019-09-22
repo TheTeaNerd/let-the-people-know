@@ -1,9 +1,9 @@
 name: Rubocop Checks
-
 on: [push]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    - name: Rubocop checks
-      uses: gimenete/rubocop-action@1.0
+    steps:
+      - name: Rubocop checks
+        uses: gimenete/rubocop-action@1.0
