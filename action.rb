@@ -49,7 +49,7 @@ commits.each do |commit|
 
     change_log = message_lines.select { |line| line.match?('Changelog') }
     if change_log
-      announcement += "> #{changelog}\n"
+      announcement += "> #{change_log}\n"
     end
   else
     summary.gsub(/#(\d+)/, "[#\\1](#{repository_url}/issues/\\1)")
