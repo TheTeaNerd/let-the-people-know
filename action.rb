@@ -48,7 +48,7 @@ commits.each do |commit|
     end
 
     change_log = message_lines.select { |line| line.match?('Changelog') }
-    if changelog
+    if change_log
       announcement += "> #{changelog}\n"
     end
   else
