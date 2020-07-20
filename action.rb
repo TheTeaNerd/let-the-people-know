@@ -38,18 +38,18 @@ commits.each do |commit|
   message_lines.shift # Discard the blank line between summary and details
   author = commit.dig('author', 'name')
 
-  if author == 'dependabot-preview[bot]'
-    summary = message_lines.first.sub('Bumps ', 'Upgrades library ')
+  if author == 'dependabot-preview[bot]' || author == 'dependabot[bot]'
+    summary = message_lines.first.sub(/Bumps? /, 'Upgrades library ')
     announcement += "• #{summary} _(:robot_face: Dependabot)_\n"
 
     release_notes = message_lines.select { |line| line.match?('Release notes') }
     if release_notes
-      announcement += "> #{release_notes}\n"
+      announcement += "#{release_notes}\n"
     end
 
     change_log = message_lines.select { |line| line.match?('Changelog') }
     if change_log
-      announcement += "> #{change_log}\n"
+      announcement += "#{change_log}\n"
     end
   else
     summary.gsub(/#(\d+)/, "[#\\1](#{repository_url}/issues/\\1)")
