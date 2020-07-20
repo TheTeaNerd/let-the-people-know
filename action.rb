@@ -52,7 +52,7 @@ commits.each do |commit|
       announcement += "> #{change_log}\n"
     end
   else
-    summary.gsub!(/#(\d+)/, "[#\\1](#{repository_url}/issues/\\1)")
+    summary.gsub!(/#(\d+)/, "<#{repository_url}/issues/\\1|#\\1>")
     announcement += "• #{summary} _(#{author})_\n"
     message_lines.each { |line| announcement += "> #{line}\n" }
   end
