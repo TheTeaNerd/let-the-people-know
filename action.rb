@@ -8,6 +8,8 @@ webhook = ENV.fetch('SLACK_WEBHOOK')
 event = ENV.fetch('GITHUB_EVENT_PATH')
 
 parsed = YAML.safe_load(File.open(event))
+puts "Event is:"
+puts parsed
 commits = parsed.fetch('commits').reject do |commit|
   commit.fetch('message').start_with?('Merge pull request')
 end
@@ -16,6 +18,8 @@ commits = commits.reject do |commit|
 end
 
 return if commits.empty?
+puts "Commits are:"
+puts commits
 
 repository_name = parsed.dig('repository', 'name')
                         .split('-')
