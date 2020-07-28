@@ -43,7 +43,7 @@ commits.each do |commit|
   author = commit.dig('author', 'name')
 
   if author == 'dependabot-preview[bot]' || author == 'dependabot[bot]'
-    summary = message_lines.first.sub(/Bumps? /, 'Upgrades library ')
+    summary = message_lines.first.sub(/Bumps? /, ':hammer_and_wrench: Upgrades library ')
     announcement += "• #{summary} _(:robot_face: Dependabot)_\n"
 
     release_notes = message_lines.select { |line| line.match?('Release notes') }.first
