@@ -8,7 +8,7 @@ webhook = ENV.fetch('SLACK_WEBHOOK')
 event = ENV.fetch('GITHUB_EVENT_PATH')
 
 parsed = YAML.safe_load(File.open(event))
-puts "Event is:"
+puts 'Event is:'
 puts parsed
 commits = parsed.fetch('commits').reject do |commit|
   commit.fetch('message').start_with?('Merge pull request')
@@ -18,7 +18,8 @@ commits = commits.reject do |commit|
 end
 
 return if commits.empty?
-puts "Commits are:"
+
+puts 'Commits are:'
 puts commits
 
 repository_name = parsed.dig('repository', 'name')
@@ -42,19 +43,15 @@ commits.each do |commit|
   message_lines.shift # Discard the blank line between summary and details
   author = commit.dig('author', 'name')
 
-  if author == 'dependabot-preview[bot]' || author == 'dependabot[bot]'
+  if ['dependabot-preview[bot]', 'dependabot[bot]'].include?(author)
     summary = message_lines.first.sub(/Bumps? /, ':hammer_and_wrench: Upgrades library ')
     announcement += "• #{summary} _(:robot_face: Dependabot)_\n"
 
     release_notes = message_lines.select { |line| line.match?('Release notes') }.first
-    if release_notes
-      announcement += "> #{release_notes}\n"
-    end
+    announcement += "> #{release_notes}\n" if release_notes
 
     change_log = message_lines.select { |line| line.match?('Changelog') }.first
-    if change_log
-      announcement += "> #{change_log}\n"
-    end
+    announcement += "> #{change_log}\n" if change_log
   else
     summary.gsub!(/#(\d+)/, "<#{repository_url}/issues/\\1|#\\1>")
     announcement += "• #{summary} _(#{author})_\n"
