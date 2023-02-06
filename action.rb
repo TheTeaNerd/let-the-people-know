@@ -5,6 +5,10 @@ require 'pry'
 require 'slack-notifier'
 require 'yaml'
 
+def pretty_print(hash)
+  Pry::ColorPrinter.pp(hash)
+end
+
 webhook = ENV.fetch('SLACK_WEBHOOK')
 if webhook.nil?
   warn 'Error: SLACK_WEBHOOK is not configured.'
@@ -15,7 +19,7 @@ event_path = ENV.fetch('GITHUB_EVENT_PATH')
 file = File.open(event_path)
 parsed_event = YAML.safe_load(file)
 puts 'GitHub event is:'
-Pry::ColorPrinter.pp(parsed_event)
+pretty_print(parsed_event)
 
 puts 'Rejecting merge commits...'
 commits = parsed_event.fetch('commits').reject do |commit|
@@ -32,7 +36,7 @@ if commits.empty?
 end
 
 puts 'Commits are:'
-puts commits
+pretty_print(commits)
 
 repository_name = parsed_event.dig('repository', 'name')
                               .split('-')
