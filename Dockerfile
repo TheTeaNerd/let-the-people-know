@@ -1,4 +1,4 @@
-FROM ruby:2.6.4-alpine
+FROM ruby:3.2.0-alpine
 
 ENV APP_HOME /app
 WORKDIR ${APP_HOME}
