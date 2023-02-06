@@ -1,43 +1,44 @@
 # frozen_string_literal: true
 
 require 'date'
+require 'pry'
 require 'slack-notifier'
 require 'yaml'
 
 webhook = ENV.fetch('SLACK_WEBHOOK')
-puts "Webhook is: '#{webhook}'"
-event = ENV.fetch('GITHUB_EVENT_PATH')
-puts "Event is: '#{event}'"
+if webhook.nil?
+  warn 'Error: SLACK_WEBHOOK is not configured.'
+  return
+end
 
-file = File.open(event)
-puts "File is: '#{file}'"
-parsed = YAML.safe_load(file)
-puts "Parsed event is: '#{parsed}'"
+event_path = ENV.fetch('GITHUB_EVENT_PATH')
+file = File.open(event_path)
+parsed_event = YAML.safe_load(file)
+puts 'GitHub event is:'
+Pry::ColorPrinter.pp(parsed_event)
 
 puts 'Rejecting merge commits...'
-commits = parsed.fetch('commits').reject do |commit|
+commits = parsed_event.fetch('commits').reject do |commit|
   commit.fetch('message').start_with?('Merge pull request')
 end
-puts 'Done'
-puts 'Rejecting Travis CI commits'
+puts 'Rejecting Travis CI commits...'
 commits = commits.reject do |commit|
   commit.dig('author', 'name') == 'Travis CI'
 end
-puts 'Done'
 
 if commits.empty?
-  puts 'There are no commits!'
+  puts 'Nothing to do, there are no commits!'
   return
 end
 
 puts 'Commits are:'
 puts commits
 
-repository_name = parsed.dig('repository', 'name')
-                        .split('-')
-                        .map(&:capitalize)
-                        .join
-repository_url = parsed.dig('repository', 'html_url')
+repository_name = parsed_event.dig('repository', 'name')
+                              .split('-')
+                              .map(&:capitalize)
+                              .join
+repository_url = parsed_event.dig('repository', 'html_url')
 announcement = <<~MARKUP
   *[#{repository_name}](#{repository_url}) has been updated!*
 
@@ -71,14 +72,14 @@ commits.each do |commit|
 end
 announcement += "\n"
 
-compare_url = parsed.fetch('compare')
+compare_url = parsed_event.fetch('compare')
 announcement += "\n[Full changes](#{compare_url})"
 
-puts 'Announcement for Slack:'
+puts 'Announcement MarkDown is:'
 puts announcement
-puts 'Sending to Slack'
+
+puts 'Notifying Slack'
 notifier = Slack::Notifier.new(webhook)
 notifier.ping announcement
 
-puts
 puts 'Done'
