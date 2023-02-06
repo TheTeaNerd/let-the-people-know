@@ -5,19 +5,30 @@ require 'slack-notifier'
 require 'yaml'
 
 webhook = ENV.fetch('SLACK_WEBHOOK')
+puts "Webhook is: '#{webhook}'"
 event = ENV.fetch('GITHUB_EVENT_PATH')
+puts "Event is: '#{event}'"
 
-parsed = YAML.safe_load(File.open(event))
-puts 'Event is:'
-puts parsed
+file = File.open(event)
+puts "File is: '#{file}'"
+parsed = YAML.safe_load(file)
+puts "Parsed event is: '#{parsed}'"
+
+puts 'Rejecting merge commits...'
 commits = parsed.fetch('commits').reject do |commit|
   commit.fetch('message').start_with?('Merge pull request')
 end
+puts 'Done'
+puts 'Rejecting Travis CI commits'
 commits = commits.reject do |commit|
   commit.dig('author', 'name') == 'Travis CI'
 end
+puts 'Done'
 
-return if commits.empty?
+if commits.empty?
+  puts 'There are no commits!'
+  return
+end
 
 puts 'Commits are:'
 puts commits
@@ -63,8 +74,9 @@ announcement += "\n"
 compare_url = parsed.fetch('compare')
 announcement += "\n[Full changes](#{compare_url})"
 
-puts 'Sending to Slack'
+puts 'Announcement for Slack:'
 puts announcement
+puts 'Sending to Slack'
 notifier = Slack::Notifier.new(webhook)
 notifier.ping announcement
 
