@@ -9,45 +9,68 @@ def pretty_print(hash)
   Pry::ColorPrinter.pp(hash)
 end
 
+def parse_event
+  event_path = ENV.fetch('GITHUB_EVENT_PATH')
+  file = File.open(event_path)
+  parsed_event = YAML.safe_load(file)
+  puts 'GitHub event is:'
+  pretty_print(parsed_event)
+  parsed_event
+end
+
+def meaningful_commits(parsed_event)
+  parsed_event.fetch('commits').reject do |commit|
+    commit.fetch('message').start_with?('Merge pull request')
+  end.reject do |commit|
+    commit.dig('author', 'name') == 'Travis CI'
+  end
+end
+
+def section(text)
+  {
+    type: :section,
+    text: {
+      type: :mrkdwn,
+      text: text
+    }
+  }
+end
+
 webhook = ENV.fetch('SLACK_WEBHOOK')
 if webhook.nil?
   warn 'Error: SLACK_WEBHOOK is not configured.'
   return
 end
 
-event_path = ENV.fetch('GITHUB_EVENT_PATH')
-file = File.open(event_path)
-parsed_event = YAML.safe_load(file)
-puts 'GitHub event is:'
-pretty_print(parsed_event)
-
-puts 'Rejecting merge commits...'
-commits = parsed_event.fetch('commits').reject do |commit|
-  commit.fetch('message').start_with?('Merge pull request')
-end
-puts 'Rejecting Travis CI commits...'
-commits = commits.reject do |commit|
-  commit.dig('author', 'name') == 'Travis CI'
-end
+parsed_event = parse_event
+commits = meaningful_commits(parsed_event)
 
 if commits.empty?
   puts 'Nothing to do, there are no commits!'
   return
+else
+  puts 'Commits are:'
+  pretty_print(commits)
 end
 
-puts 'Commits are:'
-pretty_print(commits)
-
+pretty_date = DateTime.now.strftime('%A %B %d, %Y')
 repository_name = parsed_event.dig('repository', 'name')
-                              .split('-')
-                              .map(&:capitalize)
-                              .join
 repository_url = parsed_event.dig('repository', 'html_url')
-announcement = <<~MARKUP
-  *[#{repository_name}](#{repository_url}) has been updated!*
+compare_url = parsed_event.fetch('compare')
 
-  _Changes_
-MARKUP
+header = "*A new version of <#{repository_url}|#{repository_name}> has been released!*\n<#{compare_url}|See commits :octocat:>"
+
+changelog_intro = if commits.one?
+                    'The only change is:'
+                  else
+                    "The #{commits.size} individual changes are:"
+                  end
+
+blocks = []
+blocks << section(pretty_date)
+blocks << section(header)
+blocks << section(changelog_intro)
+
 commits.each do |commit|
   message_lines = commit.fetch('message')
                         .gsub(/\[no *ticket\]/i, '')
@@ -58,32 +81,31 @@ commits.each do |commit|
   summary = message_lines.shift
   message_lines.shift # Discard the blank line between summary and details
   author = commit.dig('author', 'name')
+  change = nil
 
   if ['dependabot-preview[bot]', 'dependabot[bot]'].include?(author)
     summary = message_lines.first.sub(/Bumps? /, ':hammer_and_wrench: Upgrades library ')
-    announcement += "• #{summary} _(:robot_face: Dependabot)_\n"
+    change = "#{summary} _(:robot_face: Dependabot)_\n"
 
     release_notes = message_lines.select { |line| line.match?('Release notes') }.first
-    announcement += "> #{release_notes}\n" if release_notes
+    change += "> #{release_notes}\n" if release_notes
 
     change_log = message_lines.select { |line| line.match?('Changelog') }.first
-    announcement += "> #{change_log}\n" if change_log
+    change += "> #{change_log}\n" if change_log
   else
     summary.gsub!(/#(\d+)/, "<#{repository_url}/issues/\\1|#\\1>")
-    announcement += "• #{summary} _(#{author})_\n"
-    message_lines.each { |line| announcement += "> #{line}\n" }
+    change = "#{summary} _(#{author})_\n"
+    message_lines.each { |line| change += "> #{line}\n" }
   end
+  blocks << section(change)
 end
-announcement += "\n"
 
-compare_url = parsed_event.fetch('compare')
-announcement += "\n[Full changes](#{compare_url})"
-
-puts 'Announcement MarkDown is:'
-puts announcement
+puts "\n\nBlocks:\n"
+pretty_print(blocks)
 
 puts 'Notifying Slack'
 notifier = Slack::Notifier.new(webhook)
-notifier.ping announcement
+
+notifier.post(blocks: blocks)
 
 puts 'Done'
