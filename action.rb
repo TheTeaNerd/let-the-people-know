@@ -58,7 +58,7 @@ repository_name = parsed_event.dig('repository', 'name')
 repository_url = parsed_event.dig('repository', 'html_url')
 compare_url = parsed_event.fetch('compare')
 
-header = "*A new version of <#{repository_url}|#{repository_name}> has been released!*\n<#{compare_url}|See commits :octocat:>"
+header = "*A new version of <#{repository_url}|#{repository_name}> has been released!* <#{compare_url}|See commits :octocat:>"
 
 changelog_intro = if commits.one?
                     'The only change is:'
