@@ -36,6 +36,10 @@ def section(text)
   }
 end
 
+def markdown_to_slack(text)
+  text.gsub('[', '<').gsub('](', '|').gsub(')', '>')
+end
+
 webhook = ENV.fetch('SLACK_WEBHOOK')
 if webhook.nil?
   warn 'Error: SLACK_WEBHOOK is not configured.'
@@ -88,10 +92,10 @@ commits.each do |commit|
     change = "#{summary} _(:robot_face: Dependabot)_\n"
 
     release_notes = message_lines.select { |line| line.match?('Release notes') }.first
-    change += "> #{release_notes}\n" if release_notes
+    change += "> #{markdown_to_slack(release_notes)}\n" if release_notes
 
     change_log = message_lines.select { |line| line.match?('Changelog') }.first
-    change += "> #{change_log}\n" if change_log
+    change += "> #{markdown_to_slack(change_log)}\n" if change_log
   else
     summary.gsub!(/#(\d+)/, "<#{repository_url}/issues/\\1|#\\1>")
     change = "#{summary} _(#{author})_\n"
