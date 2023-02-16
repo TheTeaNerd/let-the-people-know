@@ -37,7 +37,12 @@ def section(text)
 end
 
 def markdown_to_slack(text)
-  text.gsub('[', '<').gsub('](', '|').gsub(')', '>')
+  regexp = Regexp.new(/\[([^\[]+)\]\(([^)]+)\)/)
+  if regexp =~ text
+    "<#{Regexp.last_match(2)}|#{Regexp.last_match(1)}>"
+  else
+    text
+  end
 end
 
 webhook = ENV.fetch('SLACK_WEBHOOK')
