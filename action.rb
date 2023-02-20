@@ -94,14 +94,14 @@ commits.each do |commit|
 
   if ['dependabot-preview[bot]', 'dependabot[bot]'].include?(author)
     summary = markdown_to_slack(message_lines.first)
-    summary.sub(/Bumps? /, ':hammer_and_wrench: Upgrades library ')
+    summary.sub!(/Bump /, ':hammer_and_wrench: Upgrades library ')
     change = "#{summary} _(:robot_face: Dependabot)_\n"
 
     release_notes = message_lines.select { |line| line.match?('Release notes') }.first
-    change += "> #{markdown_to_slack(release_notes)}\n" if release_notes
+    change += "#{markdown_to_slack(release_notes)}\n" if release_notes
 
     change_log = message_lines.select { |line| line.match?('Changelog') }.first
-    change += "> #{markdown_to_slack(change_log)}\n" if change_log
+    change += "#{markdown_to_slack(change_log)}\n" if change_log
   else
     summary.gsub!(/#(\d+)/, "<#{repository_url}/issues/\\1|#\\1>")
     change = "#{summary} _(#{author})_\n"
