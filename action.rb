@@ -39,7 +39,7 @@ end
 def markdown_to_slack(text)
   regexp = Regexp.new(/([^\[]+)\[([^\[]+)\]\(([^)]+)\)(.*)/)
   if regexp =~ text
-    "#{Regexp.last_match(1)} <#{Regexp.last_match(3)}|#{Regexp.last_match(2)}> #{Regexp.last_match(4)}"
+    "#{Regexp.last_match(1)}<#{Regexp.last_match(3)}|#{Regexp.last_match(2)}>#{Regexp.last_match(4)}"
   else
     text
   end
@@ -93,7 +93,8 @@ commits.each do |commit|
   change = nil
 
   if ['dependabot-preview[bot]', 'dependabot[bot]'].include?(author)
-    summary = message_lines.first.sub(/Bumps? /, ':hammer_and_wrench: Upgrades library ')
+    summary = markdown_to_slack(message_lines.first)
+    summary.sub(/Bumps? /, ':hammer_and_wrench: Upgrades library ')
     change = "#{summary} _(:robot_face: Dependabot)_\n"
 
     release_notes = message_lines.select { |line| line.match?('Release notes') }.first
