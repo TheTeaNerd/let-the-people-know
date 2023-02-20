@@ -37,9 +37,9 @@ def section(text)
 end
 
 def markdown_to_slack(text)
-  regexp = Regexp.new(/\[([^\[]+)\]\(([^)]+)\)/)
+  regexp = Regexp.new(/([^\[]+)\[([^\[]+)\]\(([^)]+)\)(.*)/)
   if regexp =~ text
-    "<#{Regexp.last_match(2)}|#{Regexp.last_match(1)}>"
+    "#{Regexp.last_match(1)} <#{Regexp.last_match(3)}|#{Regexp.last_match(2)}> #{Regexp.last_match(4)}"
   else
     text
   end
